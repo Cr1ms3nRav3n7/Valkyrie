@@ -55,3 +55,8 @@ print()
 print(colored('Enumerating HTTP, HTTPS and SMB from initial nmap scans...','blue'))
 
 call("scripts/lhf.sh")
+
+print()
+print(colored('Checking SMB hosts for signing policy...', 'blue'))
+
+call("scripts/smb.sh")
