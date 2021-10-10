@@ -30,9 +30,9 @@ while True:
         break
 
 print()
-print(colored('rDNS sweeps done!', 'green'))
+print(colored('rDNS sweeps done!', 'blue'))
 print()
-print(colored('Grepping output for live hosts...', 'green'))
+print(colored('Grepping output for live hosts...', 'blue'))
 
 call("scripts/grep.sh")
 
@@ -42,7 +42,7 @@ print(colored('Creating list of subnets to sweep...', 'blue'))
 call("scripts/subnet.sh")
 
 print()
-print(colored('Sweeping enumerated subnets...', 'green'))
+print(colored('Sweeping enumerated subnets...', 'blue'))
 
 call("scripts/pingsweep.sh")
 
