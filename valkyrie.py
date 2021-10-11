@@ -12,7 +12,7 @@ from subprocess import call
 b= open ('valk.txt', 'r')
 print(colored(''.join([line for line in b]),'blue')) 
 
-print (colored('Starting rDNS sweeps, this could take a while...','green'))
+print (colored('Starting rDNS sweeps, this could take a while...','blue'))
 process = subprocess.Popen(['nmap', '-sL', '-R', '192.168.0.0/16'],  stdout=subprocess.PIPE,
                            universal_newlines=True)
 
