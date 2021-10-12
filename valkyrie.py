@@ -32,7 +32,7 @@ if answer == 'y':
 		
 		args = "-sL -R --excludefile {}".format(file)
 		
-		nmap.scan(hosts='192.168.2.0/24', arguments=args)
+		nmap.scan(hosts='10.0.0.0/8 172.16.0.0/12 192.168.0.0/16', arguments=args)
 		f = open('output/hosts.txt', "w")
 		g = open('output/rdns.txt', 'w')
 		for host in nmap.all_hosts():
