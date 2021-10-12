@@ -74,7 +74,7 @@ if answer == 'y':
 		print()
 		print(colored('Initial enumeration done, check output for files to use for further nmap scans!', 'blue'))
 	else:
-		text = "{} does not exist, check your path".format(file)
+		text = "{} does not exist, check your path.".format(file)
 		print()
 		print(colored(text, 'red'))
 
@@ -120,7 +120,7 @@ if answer == 'n':
 				print(host, file=f)
 elif answer != 'y' or answer != 'n' and file == '':
 	print()
-	print(colored('Invalid argument, please use y or n', 'red'))
+	print(colored("Invalid argument, please use 'y' or 'n'", 'red'))
 
 
 
