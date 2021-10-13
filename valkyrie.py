@@ -32,6 +32,7 @@ if answer == 'y':
 		
 		args = "-sL -R --excludefile {}".format(file)
 		
+		#Perform RDNS sweeps on private subnets with nmap and write to file output/rdns.txt
 		nmap.scan(hosts='10.0.0.0/8 172.16.0.0/12 192.168.0.0/16', arguments=args)
 		f = open('output/hosts.txt', "w")
 		g = open('output/rdns.txt', 'w')
@@ -48,12 +49,14 @@ if answer == 'y':
 
 		print()
 		print(colored('Creating list of subnets to sweep...', 'blue'))
-
+		
+		#Calls bash script to grep the rdns.txt file and ouput a list of subnets with live hosts
 		call("scripts/subnet.sh")
 
 		print()
 		print(colored('Sweeping enumerated subnets...', 'blue'))
 
+		#ICMP ping sweep of enumerated subnets
 		sweep = open('output/subnets.txt', 'r')
 		lines = sweep.readlines()
 		arg2 = "-sn -n -PE --excludefile {}".format(file)
