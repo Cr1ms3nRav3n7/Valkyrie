@@ -6,24 +6,31 @@
 import sys
 import subprocess
 import nmap
+import argparse
 from termcolor import colored
 from subprocess import call
 from os.path import exists
 
 #define nmap
-nmap = nmap.PortScanner()
+nm = nmap.PortScanner()
+#define nmapa
+nma = nmap.PortScannerAsync()
+
+#define arguments
+parser = argparse.ArgumentParser(description='Tool to enumerate private networks.')
+parser.add_argument("--rdns", help="Perform RDNS sweeps of private subnets", action="store_true")
+parser.add_argument("--nmap", help="Perform nmap scans of enumerated subnet. This will not work if RDNS sweeps have not been performed.", action="store_true")
+args = parser.parse_args()
 
 #print banner
 b= open ('valk.txt', 'r')
 print(colored(''.join([line for line in b]),'blue')) 
 
-#Check for exclusions
-answer = input('Are there any exclusions for this? y/n ')
 
-if answer == 'y':
+if args.rdns:
 	
-	#Get file for exclusions	
-	file = input('Enter the path to the exclusions file: ')
+	#Check for exclusions.txt.	
+	file = 'exclusions.txt'
 	file_exists = exists(file)
 	if file_exists == True:
 	
@@ -33,14 +40,14 @@ if answer == 'y':
 		args = "-sL -R --excludefile {}".format(file)
 		
 		#Perform RDNS sweeps on private subnets with nmap and write to file output/rdns.txt
-		nmap.scan(hosts='10.0.0.0/8 172.16.0.0/12 192.168.0.0/16', arguments=args)
+		nm.scan(hosts='10.0.0.0/8 172.16.0.0/12 192.168.0.0/16', arguments=args)
 		f = open('output/hosts.txt', "w")
 		g = open('output/rdns.txt', 'w')
-		for host in nmap.all_hosts():
-			hostname = nmap[host].hostname()
+		for host in nm.all_hosts():
+			hostname = nm[host].hostname()
 			if hostname != '':
 				print (host, file=f)
-				print (host, nmap[host].hostname(), file=g)
+				print (host, nm[host].hostname(), file=g)
 		f.close()
 		g.close()
 
@@ -66,9 +73,11 @@ if answer == 'y':
 			output = 'output/'+line.strip()+'.txt'
 			f = open(output, 'w')
 			subnet=line.strip()+'.0/24'
-			nmap.scan(hosts=subnet, arguments=arg2)
-			for host in nmap.all_hosts():
-				status = nmap[host].state()
+			nma.scan(hosts=subnet, arguments=arg2)
+			while nma.still_scanning():
+				print("Scanning ", subnet)
+			for host in nma.all_hosts():
+				status = nma[host].state()
 				if status == 'up':
 					print(host, file=f)
 				
@@ -77,53 +86,8 @@ if answer == 'y':
 		print()
 		print(colored('Initial enumeration done, check output for files to use for further nmap scans!', 'blue'))
 	else:
-		text = "{} does not exist, check your path.".format(file)
 		print()
-		print(colored(text, 'red'))
-
-if answer == 'n':
-	print('No exclusions, continuing...')
-	print()
-	print (colored('Starting rDNS sweeps, this could take a while...','blue'))
-
-	nmap.scan(hosts='192.168.2.0/24', arguments='-sL -R')
-	f = open('output/hosts.txt', "w")
-	g = open('output/rdns.txt', 'w')
-	for host in nmap.all_hosts():
-		hostname = nmap[host].hostname()
-		if hostname != '':
-			print (host, file=f)
-			print (host, nmap[host].hostname(), file=g)
-	f.close()
-	g.close()
-
-	print()
-	print(colored('rDNS sweeps done!', 'blue'))
-
-	print()
-	print(colored('Creating list of subnets to sweep...', 'blue'))
-
-	call("scripts/subnet.sh")
-
-	print()
-	print(colored('Sweeping enumerated subnets...', 'blue'))
-
-	sweep = open('output/subnets.txt', 'r')
-	lines = sweep.readlines()
-
-
-	for line in lines:
-		file = 'output/'+line.strip()+'.txt'
-		f = open(file, 'w')
-		subnet=line.strip()+'.0/24'
-		nmap.scan(hosts=subnet, arguments='-sn -n -PE')
-		for host in nmap.all_hosts():
-			status = nmap[host].state()
-			if status == 'up':
-				print(host, file=f)
-elif answer != 'y' or answer != 'n' and file == '':
-	print()
-	print(colored("Invalid argument, please use 'y' or 'n'", 'red'))
+		print(colored("exclusions.txt does not exist. Please create the file and try again.", "red"))
 
 
 
