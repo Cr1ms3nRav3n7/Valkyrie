@@ -103,35 +103,35 @@ def hostbyport():
 	
 	for host in nm.all_hosts():
 		#Check for HTTP
-		f = open('output/hosts/http.txt', 'a+')
+		f = open('output/hosts/ports/http.txt', 'a+')
 		try:
 			if nm[host]['tcp'][80]['state'] == 'open':
 				print(host, file=f)
 		except:
 			pass
 		#Check for HTTPS
-		f = open('output/hosts/https.txt', 'a+')
+		f = open('output/hosts/ports/https.txt', 'a+')
 		try:
 			if nm[host]['tcp'][443]['state'] == 'open':
 				print(host, file=f)
 		except:
 			pass
 		#Check for SMB
-		f = open('output/hosts/smb.txt', 'a+')
+		f = open('output/hosts/ports/smb.txt', 'a+')
 		try:
 			if nm[host]['tcp'][445]['state'] == 'open':
 				print(host, file=f)
 		except:
 			pass
 		#Check for FTP
-		f = open('output/hosts/ftp.txt', 'a+')
+		f = open('output/hosts/ports/ftp.txt', 'a+')
 		try:
 			if nm[host]['tcp'][21]['state'] == 'open':
 				print(host, file=f)
 		except:
 			pass
 		#Check for SQL
-		f = open('output/hosts/sql.txt', 'a+')
+		f = open('output/hosts/ports/sql.txt', 'a+')
 		try:
 			if nm[host]['tcp'][1433]['state'] == 'open':
 				print(host, file=f)
