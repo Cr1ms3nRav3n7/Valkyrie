@@ -99,6 +99,45 @@ def pingsweep():
 	print()
 	print(colored("Pingsweeps completed! Check output/hosts/ for files", 'blue'))
 	
+def hostbyport():
+	
+	for host in nm.all_hosts():
+		#Check for HTTP
+		f = open('output/hosts/http.txt', 'a+')
+		try:
+			if nm[host]['tcp'][80]['state'] == 'open':
+				print(host, file=f)
+		except:
+			pass
+		#Check for HTTPS
+		f = open('output/hosts/https.txt', 'a+')
+		try:
+			if nm[host]['tcp'][443]['state'] == 'open':
+				print(host, file=f)
+		except:
+			pass
+		#Check for SMB
+		f = open('output/hosts/smb.txt', 'a+')
+		try:
+			if nm[host]['tcp'][445]['state'] == 'open':
+				print(host, file=f)
+		except:
+			pass
+		#Check for FTP
+		f = open('output/hosts/ftp.txt', 'a+')
+		try:
+			if nm[host]['tcp'][21]['state'] == 'open':
+				print(host, file=f)
+		except:
+			pass
+		#Check for SQL
+		f = open('output/hosts/sql.txt', 'a+')
+		try:
+			if nm[host]['tcp'][1433]['state'] == 'open':
+				print(host, file=f)
+		except:
+			pass
+		
 def nmaprnd1():
 	
 	print()
@@ -111,7 +150,7 @@ def nmaprnd1():
 			print(colored('Performing nmap scans, this could take an even longer while...','blue'))
 			for line in Lines:
 				n = open('output/nmaprnd1.txt', 'a+')
-				nm.scan(line, arguments="-Pn -sS -vv")
+				nm.scan(line, arguments="-f -Pn -sS -vv")
 				for host in nm.all_hosts():
 					print ('', file=n)
 					print('Host : %s (%s)' % (host, nm[host].hostname()), file=n)
@@ -123,11 +162,7 @@ def nmaprnd1():
 						#lport.sort()
 						for port in lport:
 							print ('port : %s\tstate : %s' % (port, nm[host][proto][port]['state']), file=n)
-							
-				
-					
-	
-			
+					hostbyport()																			
 
 if args.rdns and args.pingsweep == False and args.nmap == False:
 
@@ -159,7 +194,7 @@ if args.nmap and args.pingsweep and args.rdns == False:
 	
 if args.rdns and args.nmap and args.pingsweep == False:
 
-	print("nmap won't work without --pingsweep")
+	print("--nmap won't work without --pingsweep")
 		
 if len(sys.argv) == 1:
     parser.print_help()
