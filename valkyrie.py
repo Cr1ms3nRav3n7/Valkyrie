@@ -12,6 +12,9 @@ from termcolor import colored
 from subprocess import call
 from os.path import exists
 
+#chmod on subnet.sh dependent script
+os.chmod('scripts/subnet.sh', st.st_mode | stat.S_IEXEC)
+
 #define nmap
 nm = nmap.PortScanner()
 nma = nmap.PortScannerAsync()
