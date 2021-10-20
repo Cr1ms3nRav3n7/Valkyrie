@@ -157,7 +157,9 @@ def nmaprnd1():
 						for port in lport:
 							print ('port : %s\tstate : %s' % (port, nm[host][proto][port]['state']), file=n)
 				hostbyport()
-				n.close()																			
+				n.close()
+	print('')
+	print(colored("Nmap scans complete! Check nmaprnd1.txt for full scan results. Hosts by port can be found under output/ports",'blue'))
 
 if args.rdns and args.pingsweep == False and args.nmap == False:
 
