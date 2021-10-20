@@ -19,20 +19,22 @@ os.chmod('scripts/subnet.sh', stat.S_IEXEC)
 #define nmap
 nm = nmap.PortScanner()
 nma = nmap.PortScannerAsync()
+#Define Example useage:
+example_text = '''example:
 
+ python3 valkyrie.py --rdns --subnets '10.0.0.0/8, 172.16.0.0/12'
+ python3 valkyrie.py --rdns --pingsweep
+ python3 valkyrie.py --nmap --ports 80 443 445 3389'''
+ 
 #define arguments
-parser = argparse.ArgumentParser(description='Tool to enumerate private networks.')
+parser = argparse.ArgumentParser(description='Tool to enumerate private networks.', epilog=example_text, formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument("--rdns", help="Perform rDNS sweeps of private subnets", action="store_true")
 parser.add_argument("--pingsweep", help="Perform ping sweeps of enumerated subnets. Uses subnets.txt under the output folder.", action="store_true")
 parser.add_argument("--nmap", help="Perform nmap scans of enumerated hosts. Uses hosts.txt under the output folder. Flags are -f -Pn -sS -vv", action="store_true")
 parser.add_argument("--exclusions", help="Path to file containing exclusions for nmap scans. Default is exclusions.txt", default="exclusions.txt", action="store", type=str)
 parser.add_argument("--subnets", help="Subnets to sweep in rDNS sweeps", default="10.0.0.0/8", action="store", type=str)
-parser.add_argument("--ports", help="Ports to check nmap scan for and output files containing live hosts.", default="80, 443, 445, 1433", action="store", type=str)
+parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and output files containing live hosts.", default=(21, 80, 443, 445), action="store", type=int)
 args, leftovers = parser.parse_known_args()
-
-#Make ports pretty
-ptc = args.ports.replace(',','')
-pf = ptc.split()
 	
 #print banner
 b= open ('valk.txt', 'r')
@@ -110,12 +112,12 @@ def pingsweep():
 	print(colored("Pingsweeps completed! Check output/hosts/ for files", 'blue'))
 	
 def hostbyport():
-	for port in pf:
+	for port in args.ports:
 		for host in nm.all_hosts():
 			#Check for Hosts by Port
 			try:
 				if nm[host]['tcp'][port]['state'] == 'open':
-					hbp = 'output/ports/'+port+'.txt'
+					hbp = 'output/ports/'+str(port)+'.txt'
 					f = open(hbp, 'a+')
 					print(host, file=f)
 					f.close()
@@ -146,8 +148,8 @@ def nmaprnd1():
 						#lport.sort()
 						for port in lport:
 							print ('port : %s\tstate : %s' % (port, nm[host][proto][port]['state']), file=n)
-				n.close()
-				hostbyport()																			
+				hostbyport()
+				n.close()																			
 
 if args.rdns and args.pingsweep == False and args.nmap == False:
 
