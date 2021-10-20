@@ -17,9 +17,12 @@ from os.path import exists
 os.chmod('scripts/subnet.sh', stat.S_IEXEC)
 
 #create directories for output hosts and ports
-os.mkdir('output')
-os.mkdir('output/hosts')
-os.mkdir('output/ports')
+if not os.path.exists('output'):
+	os.mkdir('output')
+if not os.path.exists('output/hosts'):
+	os.mkdir('output/hosts')
+if not os.path.exists('output/ports'):
+	os.mkdir('output/ports')
 
 #define nmap
 nm = nmap.PortScanner()
