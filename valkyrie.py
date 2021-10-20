@@ -45,7 +45,7 @@ parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and
 args, leftovers = parser.parse_known_args()
 	
 #print banner
-b= open ('valk.txt', 'r')
+b= open ('banner.txt', 'r')
 print(colored(''.join([line for line in b]),'blue')) 
 
 #Check for exclusions.txt.
