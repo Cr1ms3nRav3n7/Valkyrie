@@ -16,6 +16,11 @@ from os.path import exists
 #chmod on subnet.sh dependent script
 os.chmod('scripts/subnet.sh', stat.S_IEXEC)
 
+#create directories for output hosts and ports
+os.mkdir('output')
+os.mkdir('output/hosts')
+os.mkdir('output/ports')
+
 #define nmap
 nm = nmap.PortScanner()
 nma = nmap.PortScannerAsync()
