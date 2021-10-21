@@ -41,7 +41,7 @@ parser.add_argument("--pingsweep", help="Perform ping sweeps of enumerated subne
 parser.add_argument("--nmap", help="Perform nmap scans of enumerated hosts. Uses hosts.txt under the output folder. Flags are -f -Pn -sS -vv", action="store_true")
 parser.add_argument("--exclusions", help="Path to file containing exclusions for nmap scans. Default is exclusions.txt", default="exclusions.txt", action="store", type=str)
 parser.add_argument("--subnets", help="Subnets to sweep in rDNS sweeps", default="10.0.0.0/8", action="store", type=str)
-parser.add_argument("--nmapargs", help="Arguments for nmap scan", default="-f -Pn -sS -vv", action="store", type=str)
+parser.add_argument("--nmapargs", help="Arguments for nmap scan", default="-f -Pn -sS -vv --excludefile exclusions.txt", action="store", type=str)
 parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and output files containing live hosts.", default=(21, 80, 443, 445), action="store", type=int)
 args, leftovers = parser.parse_known_args()
 	
@@ -110,7 +110,7 @@ def pingsweep():
 		subnet=line.strip()+'.0/24'
 		text = "Sweeping " + subnet
 		print(colored(text, 'blue'))
-		nm.scan(hosts=subnet, arguments=args.nmap)			
+		nm.scan(hosts=subnet, arguments=args2)			
 		for host in nm.all_hosts():
 			status = nm[host].state()
 			if status == 'up':
