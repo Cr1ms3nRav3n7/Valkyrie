@@ -32,7 +32,7 @@ example_text = '''example:
 
  python3 valkyrie.py --rdns --subnets '10.0.0.0/8, 172.16.0.0/12'
  python3 valkyrie.py --rdns --pingsweep
- python3 valkyrie.py --nmap --ports 80 443 445 3389'''
+ python3 valkyrie.py --nmap --ports 80 443 445 3389 --nmapargs="-f -sV"'''
  
 #define arguments
 parser = argparse.ArgumentParser(description='Tool to enumerate private networks.', epilog=example_text, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -41,11 +41,12 @@ parser.add_argument("--pingsweep", help="Perform ping sweeps of enumerated subne
 parser.add_argument("--nmap", help="Perform nmap scans of enumerated hosts. Uses hosts.txt under the output folder. Flags are -f -Pn -sS -vv", action="store_true")
 parser.add_argument("--exclusions", help="Path to file containing exclusions for nmap scans. Default is exclusions.txt", default="exclusions.txt", action="store", type=str)
 parser.add_argument("--subnets", help="Subnets to sweep in rDNS sweeps", default="10.0.0.0/8", action="store", type=str)
+parser.add_argument("--nmapargs", help="Arguments for nmap scan", default="-f -Pn -sS -vv", action="store", type=str)
 parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and output files containing live hosts.", default=(21, 80, 443, 445), action="store", type=int)
 args, leftovers = parser.parse_known_args()
 	
 #print banner
-b= open ('banner.txt', 'r')
+b= open ('valk.txt', 'r')
 print(colored(''.join([line for line in b]),'blue')) 
 
 #Check for exclusions.txt.
@@ -109,7 +110,7 @@ def pingsweep():
 		subnet=line.strip()+'.0/24'
 		text = "Sweeping " + subnet
 		print(colored(text, 'blue'))
-		nm.scan(hosts=subnet, arguments=arg2)			
+		nm.scan(hosts=subnet, arguments=args.nmap)			
 		for host in nm.all_hosts():
 			status = nm[host].state()
 			if status == 'up':
@@ -144,22 +145,24 @@ def nmaprnd1():
 			print(colored('Performing nmap scans, this could take an even longer while...','blue'))
 			for line in Lines:
 				n = open('output/nmaprnd1.txt', 'a+')
-				nm.scan(line, arguments="-f -Pn -sS -vv")
+				nm.scan(line, arguments=args.nmapargs)
 				for host in nm.all_hosts():
 					print ('', file=n)
 					print('Host : %s (%s)' % (host, nm[host].hostname()), file=n)
 					for proto in nm[host].all_protocols():
-						print('----------', file=n)
-						print('Protocol : %s' % proto, file=n)
+						print('------------------------', file=n)
 
 						lport = nm[host][proto].keys()
 						#lport.sort()
 						for port in lport:
-							print ('port : %s\tstate : %s' % (port, nm[host][proto][port]['state']), file=n)
+							print ('port: %s\nstate: %s \nname: %s \nproduct: %s \nversion: %s' % (port, nm[host][proto][port]['state'], nm[host][proto][port]['name'], nm[host][proto][port]['product'], nm[host][proto][port]['version']), file=n)
+							print('', file=n)
+							
 				hostbyport()
 				n.close()
+				
 	print('')
-	print(colored("Nmap scans complete! Check nmaprnd1.txt for full scan results. Hosts by port can be found under output/ports",'blue'))
+	print(colored("Nmap scans complete! Check nmaprnd1.txt for full scan results. Hosts by port can be found under output/ports",'blue'))																			
 
 if args.rdns and args.pingsweep == False and args.nmap == False:
 
