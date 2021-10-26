@@ -46,7 +46,7 @@ parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and
 args, leftovers = parser.parse_known_args()
 	
 #print banner
-b= open ('valk.txt', 'r')
+b= open ('banner.txt', 'r')
 print(colored(''.join([line for line in b]),'blue')) 
 
 #Check for exclusions.txt.
@@ -110,7 +110,7 @@ def pingsweep():
 		subnet=line.strip()+'.0/24'
 		text = "Sweeping " + subnet
 		print(colored(text, 'blue'))
-		nm.scan(hosts=subnet, arguments=args2)			
+		nm.scan(hosts=subnet, arguments=arg2)			
 		for host in nm.all_hosts():
 			status = nm[host].state()
 			if status == 'up':
