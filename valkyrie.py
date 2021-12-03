@@ -38,10 +38,10 @@ example_text = '''example:
 parser = argparse.ArgumentParser(description='Tool to enumerate private networks.', epilog=example_text, formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument("--rdns", help="Perform rDNS sweeps of private subnets", action="store_true")
 parser.add_argument("--pingsweep", help="Perform ping sweeps of enumerated subnets. Uses subnets.txt under the output folder.", action="store_true")
-parser.add_argument("--nmap", help="Perform nmap scans of enumerated hosts. Uses hosts.txt under the output folder. Flags are -f -Pn -sS -vv", action="store_true")
+parser.add_argument("--nmap", help="Perform nmap scans of enumerated hosts. Uses hosts.txt under the output folder. Flags are -Pn -sS -vv", action="store_true")
 parser.add_argument("--exclusions", help="Path to file containing exclusions for nmap scans. Default is exclusions.txt", default="exclusions.txt", action="store", type=str)
 parser.add_argument("--subnets", help="Subnets to sweep in rDNS sweeps", default="10.0.0.0/8", action="store", type=str)
-parser.add_argument("--nmapargs", help="Arguments for nmap scan", default="-f -Pn -sS -vv --excludefile exclusions.txt", action="store", type=str)
+parser.add_argument("--nmapargs", help="Arguments for nmap scan", default="-Pn -sS -vv --excludefile exclusions.txt", action="store", type=str)
 parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and output files containing live hosts.", default=(21, 80, 443, 445), action="store", type=int)
 args, leftovers = parser.parse_known_args()
 	
