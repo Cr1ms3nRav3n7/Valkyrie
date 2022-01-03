@@ -5,4 +5,3 @@ Recon Suite for internal networks
 
 Run ```pip3 install python-nmap```
 
-Be sure to make the .sh scripts executable
