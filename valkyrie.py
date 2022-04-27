@@ -29,7 +29,6 @@ nm = nmap.PortScanner()
 nma = nmap.PortScannerAsync()
 # Define Example useage:
 example_text = '''example:
-
  python3 valkyrie.py --rdns --subnets '10.0.0.0/8, 172.16.0.0/12'
  python3 valkyrie.py --rdns --pingsweep
  python3 valkyrie.py --nmap --ports 80 443 445 3389 --nmapargs="-f -sV"'''
@@ -52,7 +51,7 @@ parser.add_argument("--nmapargs", help="Arguments for nmap scan", default="-p 21
 parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and output files containing live hosts.",
                     default=(21, 25, 80, 443, 445), action="store", type=int)
 parser.add_argument("--dns", help="DNS server to use for nmap scans", action="store", type=str)
-#parser.add_argument("--smb", help="Check SMB signing on hosts with port 445 open", action="store_true")
+parser.add_argument("--smb", help="Check SMB signing on hosts with port 445 open", action="store_true")
 args, leftovers = parser.parse_known_args()
 
 # print banner
@@ -181,34 +180,40 @@ def nmaprnd1():
         "\nNmap scans complete! Check nmaprnd1.txt for full scan results. Hosts by port can be found under output/ports",
         'blue'))
 
-#SMB signing check, needs fixed
-#def smbcheck():
-#    file = 'output/ports/445.txt'
-#    file_exists = exists(file)
-#    if file_exists == True:
-#        pass
-#    else:
-#
-#        print(colored('\n445.txt does not exist! Please run --nmap first!', "red"))
-#        exit()
-#
-#    smbfile = open('output/ports/445.txt', 'r')
-#    Lines = smbfile.readlines()
-#    print(colored('\nChecking hosts for SMB signing', 'blue'))
-#    for line in Lines:
-#        try:
-#            nm.scan(line, arguments='-p 445 --script smb2-security-mode')
-#            cleaned = line.strip()
-#            signing = nm[cleaned]['hostscript']
-#            disabled = 'Message signing enabled but not enforced'
-#            if disabled in signing:
-#                print(cleaned)
-#        except (KeyError):
-#            print("KeyError!")
-#            pass
+
+def smbcheck():
+    file = 'output/ports/445.txt'
+    file_exists = exists(file)
+    if file_exists == True:
+        pass
+    else:
+
+        print(colored('\n445.txt does not exist! Please run --nmap first!', "red"))
+        exit()
+
+    smbfile = open('output/ports/445.txt', 'r')
+    Lines = smbfile.readlines()
+    print(colored('\nChecking hosts for SMB signing', 'blue'))
+    for line in Lines:
+        try:
+            nm.scan(line, arguments='-p 445 --script smb2-security-mode')
+            cleaned = line.strip()
+            signing = nm[cleaned]['hostscript']
+            clean = str(signing)
+            result = ('\n' + cleaned + ' - ' + clean)
+            disabled = ("Message signing enabled but not required")
+            if disabled in result:
+                d = open('output/smbdisabled.txt', 'a+')
+                print(cleaned, file=d)
+            else:
+                e = open('output/smbenabled.txt', 'a+')
+                print(cleaned, file=e)
+        except (KeyError):
+            print(colored("KeyError! You may need to check signing manually!", "red"))
+            pass
 
 
-#    print(colored('\nSMB Signing checks complete! Check output/ for results!', 'blue'))
+    print(colored('\nSMB Signing checks complete! Check output/ for results!', 'blue'))
 
 if args.rdns == True:
     rdns_sweep()
@@ -219,8 +224,8 @@ if args.pingsweep == True:
 if args.nmap == True:
     nmaprnd1()
 
-#if args.smb == True:
-#    smbcheck()
+if args.smb == True:
+    smbcheck()
 
 if len(sys.argv) == 1:
     parser.print_help()
