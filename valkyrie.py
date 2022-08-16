@@ -13,75 +13,18 @@ from termcolor import colored
 from subprocess import call
 from os.path import exists
 
-# chmod on subnet.sh dependent script
-os.chmod('scripts/subnet.sh', stat.S_IEXEC)
+#Define functions
 
-# create directories for output hosts and ports
-if not os.path.exists('output'):
-    os.mkdir('output')
-if not os.path.exists('output/hosts'):
-    os.mkdir('output/hosts')
-if not os.path.exists('output/ports'):
-    os.mkdir('output/ports')
-
-# define nmap
-nm = nmap.PortScanner()
-nma = nmap.PortScannerAsync()
-# Define Example useage:
-example_text = '''example:
- python3 valkyrie.py --rdns --subnets '10.0.0.0/8, 172.16.0.0/12'
- python3 valkyrie.py --rdns --pingsweep
- python3 valkyrie.py --nmap --ports 80 443 445 3389 --nmapargs="-f -sV"'''
-
-# define arguments
-parser = argparse.ArgumentParser(description='Tool to enumerate private networks.', epilog=example_text,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-parser.add_argument("--rdns", help="Perform rDNS sweeps of private subnets", action="store_true")
-parser.add_argument("--pingsweep",
-                    help="Perform ping sweeps of enumerated subnets. Uses subnets.txt under the output folder.",
-                    action="store_true")
-parser.add_argument("--nmap",
-                    help="Perform nmap scans of enumerated hosts. Uses hosts.txt under the output folder. Flags are -Pn -sS -vv",
-                    action="store_true")
-parser.add_argument("--exclusions", help="Path to file containing exclusions for nmap scans. Default is exclusions.txt",
-                    default="exclusions.txt", action="store", type=str)
-parser.add_argument("--subnets", help="Subnets to sweep in rDNS sweeps", default="10.0.0.0/8", action="store", type=str)
-parser.add_argument("--nmapargs", help="Arguments for nmap scan", default="-p 21,25,80,443,445 --excludefile exclusions.txt",
-                    action="store", type=str)
-parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and output files containing live hosts.",
-                    default=(21, 25, 80, 443, 445), action="store", type=int)
-parser.add_argument("--dns", help="DNS server to use for nmap scans", action="store", type=str)
-parser.add_argument("--smb", help="Check SMB signing on hosts with port 445 open", action="store_true")
-args, leftovers = parser.parse_known_args()
-
-# print banner
-b = open('banner.txt', 'r')
-print(colored(''.join([line for line in b]), 'blue'))
-
-# Check for exclusions.txt.
-rdnssubs = args.subnets
-file = args.exclusions
-file_exists = exists(file)
-if file_exists == True:
-    pass
-else:
-    text = args.exclusions + " does not exist. Please create the file and try again."
-    print()
-    print(colored( text, "red"))
-    exit()
-#Define DNS Server
-dnsserver = args.dns
-
-def rdns_sweep():
+def rdns_sweep(dnsServer, rdnsSubnets):
     print(colored('\nStarting rDNS sweeps, this could take a while...', 'blue'))
 
-    if dnsserver == None:
+    if dnsServer == None:
     	args = "-sL -R --excludefile {}".format(file)
     else:
-    	args = "--dns-servers " + dnsserver + " -sL -R --excludefile {}".format(file)
+    	args = "--dns-servers " + dnsServer + " -sL -R --excludefile {}".format(file)
 
     # Perform RDNS sweeps on private subnets with nmap and write to file output/rdns.txt
-    nm.scan(hosts=rdnssubs, arguments=args)
+    nm.scan(hosts=rdnsSubnets, arguments=args)
     f = open('output/hosts.txt', "w")
     g = open('output/rdns.txt', 'w')
     for host in nm.all_hosts():
@@ -100,8 +43,7 @@ def rdns_sweep():
     print(colored(
         '\nInitial enumeration done, check output folder for RDNS records and enumerated subnets with live hosts.',
         'blue'))
-
-
+        
 def pingsweep():
     file = 'exclusions.txt'
     print(colored('\nSweeping enumerated subnets... \n', 'blue'))
@@ -125,10 +67,9 @@ def pingsweep():
         f.close()
 
     print(colored("\nPingsweeps completed! Check output/hosts/ for files", 'blue'))
-
-
-def hostbyport():
-    for port in args.ports:
+    
+def hostbyport(ports):
+    for port in ports:
         for host in nm.all_hosts():
             # Check for Hosts by Port
             try:
@@ -140,8 +81,7 @@ def hostbyport():
             except:
                 pass
 
-
-def nmaprnd1():
+def nmaprnd1(nmapArguments):
     directory = r'output/hosts'
     dir = os.listdir(directory)
     if len(dir) == 0:
@@ -156,7 +96,7 @@ def nmaprnd1():
                 print(colored('\nPerforming initial nmap scans, this could take a bit...', 'blue'))
                 for line in Lines:
                     n = open('output/nmaprnd1.txt', 'a+')
-                    nm.scan(line, arguments=args.nmapargs)
+                    nm.scan(line, arguments=nmapArguments)
                     for host in nm.all_hosts():
                         print('', file=n)
                         print('Host : %s (%s)' % (host, nm[host].hostname()), file=n)
@@ -177,7 +117,6 @@ def nmaprnd1():
     print(colored(
         "\nNmap scans complete! Check nmaprnd1.txt for full scan results. Hosts by port can be found under output/ports",
         'blue'))
-
 
 def smbcheck():
     file = 'output/ports/445.txt'
@@ -211,16 +150,75 @@ def smbcheck():
             pass
 
 
-    print(colored('\nSMB Signing checks complete! Check output/ for results!', 'blue'))
+    print(colored('\nSMB Signing checks complete! Check output/ for results!', 'blue'))        
+
+# define nmap
+nm = nmap.PortScanner()
+nma = nmap.PortScannerAsync()
+
+# Define Example useage:
+example_text = '''example:
+ python3 valkyrie.py --rdns --subnets '10.0.0.0/8, 172.16.0.0/12'
+ python3 valkyrie.py --rdns --pingsweep
+ python3 valkyrie.py --nmap --ports 80 443 445 3389 --nmapargs="-f -sV"'''
+
+# define arguments
+parser = argparse.ArgumentParser(description='Tool to enumerate private networks.', epilog=example_text,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument("--rdns", help="Perform rDNS sweeps of private subnets", action="store_true")
+parser.add_argument("--pingsweep",
+                    help="Perform ping sweeps of enumerated subnets. Uses subnets.txt under the output folder.",
+                    action="store_true")
+parser.add_argument("--nmap",
+                    help="Perform nmap scans of enumerated hosts. Uses hosts.txt under the output folder. Flags are -Pn -sS -vv",
+                    action="store_true")
+parser.add_argument("--exclusions", help="Path to file containing exclusions for nmap scans. Default is exclusions.txt",
+                    default="exclusions.txt", action="store", type=str)
+parser.add_argument("--subnets", help="Subnets to sweep in rDNS sweeps", default="10.0.0.0/8", action="store", type=str)
+parser.add_argument("--nmapargs", help="Arguments for nmap scan", default="-p 21,25,80,443,445 --excludefile exclusions.txt",
+                    action="store", type=str)
+parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and output files containing live hosts.",
+                    default=(21, 25, 80, 443, 445), action="store", type=int)
+parser.add_argument("--dns", help="DNS server to use for nmap scans", action="store", type=str)
+parser.add_argument("--smb", help="Check SMB signing on hosts with port 445 open", action="store_true")
+args, leftovers = parser.parse_known_args()
+
+#Main script
+
+# print banner
+b = open('banner.txt', 'r')
+print(colored(''.join([line for line in b]), 'blue'))
+
+# chmod on subnet.sh dependent script
+os.chmod('scripts/subnet.sh', stat.S_IEXEC)
+
+# create directories for output hosts and ports
+if not os.path.exists('output'):
+    os.mkdir('output')
+if not os.path.exists('output/hosts'):
+    os.mkdir('output/hosts')
+if not os.path.exists('output/ports'):
+    os.mkdir('output/ports')
+    
+# Check for exclusions.txt.
+file = args.exclusions
+file_exists = exists(file)
+if file_exists == True:
+    pass
+else:
+    text = args.exclusions + " does not exist. Please create the file and try again."
+    print()
+    print(colored( text, "red"))
+    exit()
 
 if args.rdns == True:
-    rdns_sweep()
+    rdns_sweep(args.dns,args.subnets)
 
 if args.pingsweep == True:
-    pingsweep()
+    pingsweep(args.ports)
 
 if args.nmap == True:
-    nmaprnd1()
+    nmaprnd1(args.nmapargs)
 
 if args.smb == True:
     smbcheck()
