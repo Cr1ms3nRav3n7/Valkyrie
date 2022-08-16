@@ -69,18 +69,16 @@ else:
     print()
     print(colored( text, "red"))
     exit()
-# Check for DNS server
+#Define DNS Server
 dnsserver = args.dns
-if dnsserver == None:
-    print(colored("\nPlease specify a DNS server and try again!", "red"))
-    exit()
-else:
-    pass
 
 def rdns_sweep():
     print(colored('\nStarting rDNS sweeps, this could take a while...', 'blue'))
 
-    args = "--dns-servers " + dnsserver + " -sL -R --excludefile {}".format(file)
+    if dnsserver == None:
+    	args = "-sL -R --excludefile {}".format(file)
+    else:
+    	args = "--dns-servers " + dnsserver + " -sL -R --excludefile {}".format(file)
 
     # Perform RDNS sweeps on private subnets with nmap and write to file output/rdns.txt
     nm.scan(hosts=rdnssubs, arguments=args)
