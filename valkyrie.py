@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # rDNS sweeps and initial enumeration for internal penetration tests
 # author: Cr1ms3nRav3n
-# version: 1.1
+# version: 1.2
 
 import sys
 import os
@@ -15,7 +15,7 @@ from os.path import exists
 
 #Define functions
 
-def rdns_sweep(dnsServer, rdnsSubnets):
+def rdnssweep(dnsServer, rdnsSubnets):
     print(colored('\nStarting rDNS sweeps, this could take a while...', 'blue'))
 
     if dnsServer == None:
@@ -25,15 +25,17 @@ def rdns_sweep(dnsServer, rdnsSubnets):
 
     # Perform RDNS sweeps on private subnets with nmap and write to file output/rdns.txt
     nm.scan(hosts=rdnsSubnets, arguments=args)
-    f = open('output/hosts.txt', "w")
-    g = open('output/rdns.txt', 'w')
+    print(args)
+    
+    outputHosts = open('output/hosts.txt', "w")
+    rdnsHosts = open('output/rdns.txt', 'w')
     for host in nm.all_hosts():
         hostname = nm[host].hostname()
         if hostname != '':
-            print(host, file=f)
-            print(host, nm[host].hostname(), file=g)
-    f.close()
-    g.close()
+            print(host, file=outputHosts)
+            print(host, nm[host].hostname(), file=rdnsHosts)
+    outputHosts.close()
+    rdnsHosts.close()
 
     print(colored('\nrDNS sweeps done! \n \nCreating list of subnets to sweep...', 'blue'))
 
@@ -121,10 +123,7 @@ def nmaprnd1(nmapArguments):
 def smbcheck():
     file = 'output/ports/445.txt'
     file_exists = exists(file)
-    if file_exists == True:
-        pass
-    else:
-
+    if file_exists == False:
         print(colored('\n445.txt does not exist! Please run --nmap first!', "red"))
         exit()
 
@@ -181,7 +180,7 @@ parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and
                     default=(21, 25, 80, 443, 445), action="store", type=int)
 parser.add_argument("--dns", help="DNS server to use for nmap scans", action="store", type=str)
 parser.add_argument("--smb", help="Check SMB signing on hosts with port 445 open", action="store_true")
-args, leftovers = parser.parse_known_args()
+args = parser.parse_args()		
 
 #Main script
 
@@ -203,16 +202,14 @@ if not os.path.exists('output/ports'):
 # Check for exclusions.txt.
 file = args.exclusions
 file_exists = exists(file)
-if file_exists == True:
-    pass
-else:
+if file_exists == False:
     text = args.exclusions + " does not exist. Please create the file and try again."
     print()
     print(colored( text, "red"))
     exit()
 
 if args.rdns == True:
-    rdns_sweep(args.dns,args.subnets)
+    rdnssweep(args.dns,args.subnets)
 
 if args.pingsweep == True:
     pingsweep(args.ports)
