@@ -37,9 +37,9 @@ def rdnssweep(dnsServer, rdnsSubnets):
     subId = ""
     addedSubIds = []
     for host in valid_hosts:
-        print(host[0] + '-' + host[2], file=rdnsFile)
+        print(host[0] + ' - ' + host[2][0], file=rdnsFile)
         
-        split_ip = host.split('.')
+        split_ip = host[2][0].split('.')
         subId = '.'.join(split_ip[0:3])
         if subId not in addedSubIds:
             print(subId, file=subnetsFile)
