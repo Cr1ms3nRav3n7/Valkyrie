@@ -21,7 +21,7 @@ def rdnssweep(dnsServer, rdnsSubnets):
     print(colored('\nStarting rDNS sweeps, this could take a while...', 'blue'))
 
     hostlist = [str(ip) for ip in ipaddress.IPv4Network(rdnsSubnets)]
-    sc_hosts = []
+    valid_hosts = []
     
     for addr in hostlist:
         try:
@@ -29,7 +29,7 @@ def rdnssweep(dnsServer, rdnsSubnets):
             
         except:
             pass
-    print(sc_hosts)
+    print(valid_hosts)
         
 def pingsweep():
     file = 'exclusions.txt'
