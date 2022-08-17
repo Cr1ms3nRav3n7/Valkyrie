@@ -9,6 +9,7 @@ import subprocess
 import nmap
 import argparse
 import stat
+import ipaddress
 from termcolor import colored
 from subprocess import call
 from os.path import exists
@@ -18,24 +19,17 @@ from os.path import exists
 def rdnssweep(dnsServer, rdnsSubnets):
     print(colored('\nStarting rDNS sweeps, this could take a while...', 'blue'))
 
-    if dnsServer == None:
-    	args = "-sL -R --excludefile {}".format(file)
-    else:
-    	args = "--dns-servers " + dnsServer + " -sL -R --excludefile {}".format(file)
-
-    # Perform RDNS sweeps on private subnets with nmap and write to file output/rdns.txt
-    nm.scan(hosts=rdnsSubnets, arguments=args)
-    print(args)
+    hostlist = [str(ip) for ip in ipaddress.IPv4Network(rdnsSubnets)]
+    sc_hosts = []
     
-    outputHosts = open('output/hosts.txt', "w")
-    rdnsHosts = open('output/rdns.txt', 'w')
-    for host in nm.all_hosts():
-        hostname = nm[host].hostname()
-        if hostname != '':
-            print(host, file=outputHosts)
-            print(host, nm[host].hostname(), file=rdnsHosts)
-    outputHosts.close()
-    rdnsHosts.close()
+    for addr in hostlist:
+        try:
+            sc_hosts.append(socket.gethostbyaddr(addr))
+            
+        except:
+            pass
+    print(sc_hosts)
+            
 
     print(colored('\nrDNS sweeps done! \n \nCreating list of subnets to sweep...', 'blue'))
 
