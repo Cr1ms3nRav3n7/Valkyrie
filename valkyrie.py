@@ -25,12 +25,29 @@ def rdnssweep(dnsServer, rdnsSubnets):
     
     for addr in hostlist:
         try:
-            sc_hosts.append(socket.gethostbyaddr(addr))
+            valid_hosts.append(socket.gethostbyaddr(addr))
             
         except:
             pass
-    print(valid_hosts)
+
+    rdnsFile = open('output/rdns.txt', 'w+')
+    subnetsFile = open('output/subnets.txt', 'w+')
+
+    splitIp = ""
+    subId = ""
+    addedSubIds = []
+    for host in valid_hosts:
+        print(host[0] + '-' + host[2], file=rdnsFile)
         
+        split_ip = host.split('.')
+        subId = '.'.join(split_ip[0:3])
+        if subId not in addedSubIds:
+            print(subId, file=subnetsFile)
+            addedSubIds.append(subId)
+    
+    rdnsFile.close()
+    subnetsFile.close()
+
 def pingsweep():
     file = 'exclusions.txt'
     print(colored('\nSweeping enumerated subnets... \n', 'blue'))
