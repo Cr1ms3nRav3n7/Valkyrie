@@ -5,48 +5,30 @@
 
 import sys
 import socket
-import os
-import subprocess
 import nmap
 import argparse
 import stat
+import os
 import ipaddress
+import xml.etree.ElementTree as ET
 from termcolor import colored
-from subprocess import call
 from os.path import exists
 
 #Define functions
 
-def rdnssweep(dnsServer, rdnsSubnets):
-    print(colored('\nStarting rDNS sweeps, this could take a while...', 'blue'))
-
-    hostlist = [str(ip) for ip in ipaddress.IPv4Network(rdnsSubnets)]
-    valid_hosts = []
+def magic(nmapFile):
+    print(colored('\n======Parsing nmap XML file======', 'blue'))
     
-    for addr in hostlist:
-        try:
-            valid_hosts.append(socket.gethostbyaddr(addr))
-            
-        except:
-            pass
-
-    rdnsFile = open('output/rdns.txt', 'w+')
-    subnetsFile = open('output/subnets.txt', 'w+')
-
-    splitIp = ""
-    subId = ""
-    addedSubIds = []
-    for host in valid_hosts:
-        print(host[0] + ' - ' + host[2][0], file=rdnsFile)
+    #Create tree from XML file 
+    tree = ET.parse(nmapFile)
+    
+    #Get pretty magic list
+    root = tree.getroot()
+    
+    #Pull resolved hosts
+    for host in root.findall('./host'):
         
-        split_ip = host[2][0].split('.')
-        subId = '.'.join(split_ip[0:3])
-        if subId not in addedSubIds:
-            print(subId, file=subnetsFile)
-            addedSubIds.append(subId)
     
-    rdnsFile.close()
-    subnetsFile.close()
 
 def pingsweep():
     file = 'exclusions.txt'
@@ -166,7 +148,7 @@ example_text = '''example:
 # define arguments
 parser = argparse.ArgumentParser(description='Tool to enumerate private networks.', epilog=example_text,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-parser.add_argument("--rdns", help="Perform rDNS sweeps of private subnets", action="store_true")
+parser.add_argument("--magic", help="Parse XML output from RDNS sweeps for other functions", action="store_true")
 parser.add_argument("--pingsweep",
                     help="Perform ping sweeps of enumerated subnets. Uses subnets.txt under the output folder.",
                     action="store_true")
@@ -175,7 +157,7 @@ parser.add_argument("--nmap",
                     action="store_true")
 parser.add_argument("--exclusions", help="Path to file containing exclusions for nmap scans. Default is exclusions.txt",
                     default="exclusions.txt", action="store", type=str)
-parser.add_argument("--subnets", help="Subnets to sweep in rDNS sweeps", default="10.0.0.0/8", action="store", type=str)
+parser.add_argument("--nmapfile", help="Nmap XML file to parse", default="rdns.xml", action="store", type=str)
 parser.add_argument("--nmapargs", help="Arguments for nmap scan", default="-p 21,25,80,443,445 --excludefile exclusions.txt",
                     action="store", type=str)
 parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and output files containing live hosts.",
@@ -210,8 +192,8 @@ if file_exists == False:
     print(colored( text, "red"))
     exit()
 
-if args.rdns == True:
-    rdnssweep(args.dns,args.subnets)
+if args.magic == True:
+    magic(args.nmapfile)
 
 if args.pingsweep == True:
     pingsweep(args.ports)
