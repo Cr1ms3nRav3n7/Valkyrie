@@ -4,6 +4,7 @@
 # version: 1.2
 
 import sys
+import socket
 import os
 import subprocess
 import nmap
@@ -29,16 +30,6 @@ def rdnssweep(dnsServer, rdnsSubnets):
         except:
             pass
     print(sc_hosts)
-            
-
-    print(colored('\nrDNS sweeps done! \n \nCreating list of subnets to sweep...', 'blue'))
-
-    # Calls bash script to grep the rdns.txt file and ouput a list of subnets with live hosts
-    call("scripts/subnet.sh")
-
-    print(colored(
-        '\nInitial enumeration done, check output folder for RDNS records and enumerated subnets with live hosts.',
-        'blue'))
         
 def pingsweep():
     file = 'exclusions.txt'
