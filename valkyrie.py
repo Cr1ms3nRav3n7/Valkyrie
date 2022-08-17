@@ -26,7 +26,9 @@ def magic(nmapFile):
     root = tree.getroot()
     
     #Pull resolved hosts
-    for host in root.findall('./host'):
+    for host in root.findall('./host/[hostnames]..'):
+        print(host.attrib)
+        print(host[0].attrib)
         
     
 
