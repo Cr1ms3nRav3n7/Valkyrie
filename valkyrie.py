@@ -24,7 +24,7 @@ def rdnssweeps(targetSubnet):
     print(Style.BRIGHT + Fore.BLUE + '\n======Starting RDNS Sweeps======\n')
 
     if args.full == True:
-        subprocess.call(['nmap','-sL','-R','-iL','subnets.txt','-oX','rdns.xml', '-v0'])
+        subprocess.call(['nmap','-sL','-R','-iL','/files/subnets.txt','-oX','rdns.xml', '-v0'])
     if args.single == True:
         subprocess.call(['nmap','-sL','-R',targetSubnet,'-oX','rdns_single.xml','-v0'])
 
