@@ -26,7 +26,7 @@ def rdnssweeps(targetSubnet):
     if args.full == True:
         subprocess.call(['nmap','-sL','-R','-iL','files/subnets.txt','-oX','rdns.xml', '-v0'])
     if args.single == True:
-        subprocess.call(['nmap','-sL','-R',targetSubnet,'-oX','rdns_single.xml','-v0'])
+        subprocess.call(['nmap','-sL','-R',targetSubnet,'-oX','rdns.xml','-v0'])
 
     print(Style.BRIGHT + Fore.BLUE + '\n======RDNS Sweeps complete!======\n')
 
@@ -194,12 +194,11 @@ nma = nmap.PortScannerAsync()
 
 # Define Example useage:
 example_text = '''example:
- python3 valkyrie.py --nmap --ports 80 443 445 3389 --nmapargs="-f -sV"'''
+ python3 valkyrie.py --rdns --full --nmap --ports 80 443 445 3389 --nmapargs="-f -sV"'''
 
 # define arguments
 parser = argparse.ArgumentParser(description='Tool to enumerate private networks.', epilog=example_text,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-parser.add_argument("--extract", help="Parse XML output from RDNS sweeps for other functions", action="store_true")
 parser.add_argument("--pingsweep",
                     help="Perform ping sweeps of enumerated subnets. Uses subnets.txt under the output folder.",
                     action="store_true")
@@ -208,12 +207,10 @@ parser.add_argument("--nmap",
                     action="store_true")
 parser.add_argument("--exclusions", help="Path to file containing exclusions for nmap scans. Default is exclusions.txt",
                     default="exclusions.txt", action="store", type=str)
-parser.add_argument("--nmapfile", help="Nmap XML file to parse", default="rdns.xml", action="store", type=str)
 parser.add_argument("--nmapargs", help="Arguments for nmap scan", default="-p 21,25,80,443,445 --excludefile exclusions.txt",
                     action="store", type=str)
 parser.add_argument("--ports", nargs='+', help="Ports to check nmap scan for and output files containing live hosts.",
                     default=(21, 25, 80, 443, 445), action="store", type=int)
-parser.add_argument("--dns", help="DNS server to use for nmap scans", action="store", type=str)
 parser.add_argument("--subnet", help="Target subnet for RDNS single sweep", action="store", type=str)
 parser.add_argument("--smb", help="Check SMB signing on hosts with port 445 open", action="store_true")
 parser.add_argument("--rdns", help="Run reverse DNS sweeps on private subnet ranges", action="store_true")
@@ -224,6 +221,9 @@ args = parser.parse_args()
 #Main script
 #start colorama
 init()
+
+#define nmapFile
+nmapFile = 'rdns.xml'
 
 # print banner
 b = open('banner.txt', 'r')
@@ -248,7 +248,7 @@ if args.rdns == True:
     rdnssweeps(args.subnet)
 
 if args.pingsweep == True:
-    pingsweep(getuniqsub(extractsubnets(args.nmapfile)))
+    pingsweep(getuniqsub(extractsubnets(nmapFile)))
 
 if args.nmap == True:
     nmaprnd1(args.nmapargs,args.ports)
