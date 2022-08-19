@@ -14,9 +14,12 @@ import xml.etree.ElementTree as ET
 from termcolor import colored
 from os.path import exists
 
-#Define functions
+#===============Define functions===============#
 
-#Run reverse dns sweeps on target subnets
+#-----RDNS SWEEPS-----
+#Description: Run reverse dns sweeps on target subnets. Creates a file called rdns.xml or rdns_single.xml.
+#Parameters: Takes a string of a subnet structured _._._._/# ex: 192.168.10.0/24
+#Returns: Returns a nothing.
 def rdnssweeps(targetSubnet):
     print(colored('\n======Starting RDNS Sweeps======\n', 'blue'))
 
@@ -27,6 +30,10 @@ def rdnssweeps(targetSubnet):
 
     print(colored('\n======RDNS Sweeps complete!======\n', 'blue'))
 
+#-----EXTRACT SUBNETS-----
+#Description: Function will parse xml created from an nmap rdns scan and extract the hosts with DNS records.
+#Parameters: Takes a string formatted as a path to a xml file.
+#Returns: Returns a list of host IPs with dns records.
 def extractsubnets(nmapFile):
     print(colored('\n======Parsing nmap XML file======\n', 'blue'))
     
@@ -44,18 +51,21 @@ def extractsubnets(nmapFile):
             
     print(colored('\n======Finished parsing the file, up up and away!======\n', 'blue'))   
     return validHosts
-    
+
+#-----GET UNIQUE SUB-----
+#Description: Parses given IP addresses to get the unique subnets they fall under.
+#Parameters: Takes a list of host IP addresses.
+#Returns: Returns a list of unique IP subnets for the given IPs.
 def getuniqsub(hostAddresses):
-    #Create list of subnets with live hosts from parsed XML info
     splitIP = ""
     subId = ""
     addedSubIds = []
     subnetList = []
     
     for host in hostAddresses:
-    	splitIP = host.split('.')
-    	subId = '.'.join(splitIP[0:3])
-    	if subId not in addedSubIds:
+        splitIP = host.split('.')
+        subId = '.'.join(splitIP[0:3])
+        if subId not in addedSubIds:
             addedSubIds.append(subId)
             
     for host in addedSubIds:
@@ -63,6 +73,10 @@ def getuniqsub(hostAddresses):
         
     return subnetList      
 
+#-----PING SWEEP-----
+#Description:
+#Parameters: Takes a _
+#Returns: Returns a _
 def pingsweep(subnets):
     file = 'exclusions.txt'
     print(colored('\n======Sweeping enumerated subnets...====== \n', 'blue'))
@@ -84,7 +98,11 @@ def pingsweep(subnets):
         hostfile.close()
 
     print(colored("\n======Pingsweeps completed! Check output/hosts/ for files======\n", 'blue'))
-    
+
+#-----HOST BY PORT-----
+#Description:
+#Parameters: Takes a _
+#Returns: Returns a _    
 def hostbyport(ports):
     for port in ports:
         for host in nm.all_hosts():
@@ -98,6 +116,10 @@ def hostbyport(ports):
             except:
                 pass
 
+#-----NMAP ROUND 1-----
+#Description:
+#Parameters: Takes a _
+#Returns: Returns a _
 def nmaprnd1(nmapArguments,portslist):
     directory = r'output/hosts'
     dir = os.listdir(directory)
@@ -105,8 +127,8 @@ def nmaprnd1(nmapArguments,portslist):
         print(colored('\n======No hosts in output/hosts, please run --pingsweep first!======', 'red'))
         exit()
     else:
-    	print(colored('\n======Performing initial nmap scans, this could take a bit...======', 'blue'))
-    	for filename in os.listdir(directory):
+        print(colored('\n======Performing initial nmap scans, this could take a bit...======', 'blue'))
+        for filename in os.listdir(directory):
             hosts = "output/hosts/" + filename
             with open(hosts) as f:
                 Lines = f.readlines()
@@ -134,6 +156,10 @@ def nmaprnd1(nmapArguments,portslist):
         "\n======Nmap scans complete! Check nmaprnd1.txt for full scan results. Hosts by port can be found under output/ports======",
         'blue'))
 
+#-----SMB CHECK-----
+#Description:
+#Parameters: Takes a _
+#Returns: Returns a _
 def smbcheck():
     file = 'output/ports/445.txt'
     file_exists = exists(file)
