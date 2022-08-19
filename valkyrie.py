@@ -229,9 +229,6 @@ init()
 b = open('banner.txt', 'r')
 print(Style.BRIGHT + Fore.BLUE + ''.join([line for line in b]))
 
-# chmod on subnet.sh dependent script
-os.chmod('scripts/subnet.sh', stat.S_IEXEC)
-
 # create directories for output hosts and ports
 if not os.path.exists('output'):
     os.mkdir('output')
