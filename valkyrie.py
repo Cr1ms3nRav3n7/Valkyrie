@@ -24,10 +24,14 @@ def rdnssweeps(targetSubnet):
     print(Style.BRIGHT + Fore.BLUE + '\n======Starting RDNS Sweeps======\n')
 
     if args.full == True:
-        subprocess.popen(['nmap','-sL','-R','-iL','files/subnets.txt','-oX','rdns.xml', '-v0'])
-        print("We are here")
+        subprocess.Popen(['nmap','-sL','-R','-iL','files/subnets.txt','-oX','rdns.xml', '-v0'])
     if args.single == True:
-        subprocess.call(['nmap','-sL','-R',targetSubnet,'-oX','rdns.xml','-v0'])
+        process = subprocess.Popen(['nmap','-sL','-R',targetSubnet,'-oX','rdns.xml','-v0'])
+        print("We are here")
+        while process.poll() is None:
+            print("It's running")
+    
+        
 
     print(Style.BRIGHT + Fore.BLUE + '\n======RDNS Sweeps complete!======\n')
 
