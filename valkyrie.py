@@ -74,9 +74,9 @@ def getuniqsub(hostAddresses):
     return subnetList      
 
 #-----PING SWEEP-----
-#Description:
-#Parameters: Takes a _
-#Returns: Returns a _
+#Description: This method will use nmap to ping sweep the given subnets. It will create a file with "up" hosts. EX: 192.168.10.0.txt
+#Parameters: Takes a list of subnet IP addresses
+#Returns: Returns nothing
 def pingsweep(subnets):
     file = 'exclusions.txt'
     print(colored('\n======Sweeping enumerated subnets...====== \n', 'blue'))
@@ -100,9 +100,9 @@ def pingsweep(subnets):
     print(colored("\n======Pingsweeps completed! Check output/hosts/ for files======\n", 'blue'))
 
 #-----HOST BY PORT-----
-#Description:
-#Parameters: Takes a _
-#Returns: Returns a _    
+#Description: uses namp to scan the given ports on hosts scanned with the nm module 
+#Parameters: Takes a list of port numbers to scan
+#Returns: Returns nothing    
 def hostbyport(ports):
     for port in ports:
         for host in nm.all_hosts():
@@ -117,9 +117,9 @@ def hostbyport(ports):
                 pass
 
 #-----NMAP ROUND 1-----
-#Description:
-#Parameters: Takes a _
-#Returns: Returns a _
+#Description: 
+#Parameters: Takes a string of nmap arguments, and a string of ports.
+#Returns: Returns nothing
 def nmaprnd1(nmapArguments,portslist):
     directory = r'output/hosts'
     dir = os.listdir(directory)
@@ -157,9 +157,9 @@ def nmaprnd1(nmapArguments,portslist):
         'blue'))
 
 #-----SMB CHECK-----
-#Description:
-#Parameters: Takes a _
-#Returns: Returns a _
+#Description: Uses nmap to check for SMB Signing on hosts in the "445.txt" file. Creates two files, "smbnotenforced.txt" and "smbenforced.txt"
+#Parameters: Takes Nothing
+#Returns: Returns Nothing
 def smbcheck():
     file = 'output/ports/445.txt'
     file_exists = exists(file)
