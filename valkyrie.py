@@ -11,7 +11,7 @@ import stat
 import os
 import subprocess
 import xml.etree.ElementTree as ET
-from termcolor import colored
+from colorama import init, Fore, Back, Style
 from os.path import exists
 
 #===============Define functions===============#
@@ -21,21 +21,21 @@ from os.path import exists
 #Parameters: Takes a string of a subnet structured _._._._/# ex: 192.168.10.0/24
 #Returns: Returns a nothing.
 def rdnssweeps(targetSubnet):
-    print(colored('\n======Starting RDNS Sweeps======\n', 'blue'))
+    print(Style.BRIGHT + Fore.BLUE + '\n======Starting RDNS Sweeps======\n')
 
     if args.full == True:
         subprocess.call(['nmap','-sL','-R','-iL','subnets.txt','-oX','rdns.xml', '-v0'])
     if args.single == True:
         subprocess.call(['nmap','-sL','-R',targetSubnet,'-oX','rdns_single.xml','-v0'])
 
-    print(colored('\n======RDNS Sweeps complete!======\n', 'blue'))
+    print(Style.BRIGHT + Fore.BLUE + '\n======RDNS Sweeps complete!======\n')
 
 #-----EXTRACT SUBNETS-----
 #Description: Function will parse xml created from an nmap rdns scan and extract the hosts with DNS records.
 #Parameters: Takes a string formatted as a path to a xml file.
 #Returns: Returns a list of host IPs with dns records.
 def extractsubnets(nmapFile):
-    print(colored('\n======Parsing nmap XML file======\n', 'blue'))
+    print(Style.BRIGHT + Fore.BLUE + '\n======Parsing nmap XML file======\n')
     
     #Create tree from XML file 
     tree = ET.parse(nmapFile)
@@ -49,7 +49,7 @@ def extractsubnets(nmapFile):
     for host in root.findall('./host/[hostnames]'):
        validHosts.append(host[1].get('addr'))  
             
-    print(colored('\n======Finished parsing the file, up up and away!======\n', 'blue'))   
+    print(Style.BRIGHT + Fore.BLUE + '\n======Finished parsing the file, up up and away!======\n')   
     return validHosts
 
 #-----GET UNIQUE SUB-----
@@ -79,7 +79,7 @@ def getuniqsub(hostAddresses):
 #Returns: Returns a _
 def pingsweep(subnets):
     file = 'exclusions.txt'
-    print(colored('\n======Sweeping enumerated subnets...====== \n', 'blue'))
+    print(Style.BRIGHT + Fore.BLUE + '\n======Sweeping enumerated subnets...====== \n')
 
     # ICMP ping sweep of enumerated subnets
     arg2 = "-sn -n -PE --excludefile {}".format(file)
@@ -87,8 +87,7 @@ def pingsweep(subnets):
     for subnet in subnets:
         output = 'output/hosts/' + subnet + '.txt'
         hostfile = open(output, 'w+')
-        text = "\n======Sweeping " + subnet + '======\n'
-        print(colored(text, 'blue'))
+        print(Style.BRIGHT + Fore.BLUE + "\n======Sweeping " + subnet + '======\n')
         cidr = subnet + '/24'
         nm.scan(hosts=cidr, arguments=arg2)
         for host in nm.all_hosts():
@@ -97,7 +96,7 @@ def pingsweep(subnets):
                 print(host, file=hostfile)
         hostfile.close()
 
-    print(colored("\n======Pingsweeps completed! Check output/hosts/ for files======\n", 'blue'))
+    print(Style.BRIGHT + Fore.BLUE + "\n======Pingsweeps completed! Check output/hosts/ for files======\n")
 
 #-----HOST BY PORT-----
 #Description:
@@ -120,14 +119,14 @@ def hostbyport(ports):
 #Description:
 #Parameters: Takes a _
 #Returns: Returns a _
-def nmaprnd1(nmapArguments,portslist):
+def nmaprnd1(nmapArguments,portsList):
     directory = r'output/hosts'
     dir = os.listdir(directory)
     if len(dir) == 0:
-        print(colored('\n======No hosts in output/hosts, please run --pingsweep first!======', 'red'))
+        print(Style.BRIGHT + Fore.RED + '\n======No hosts in output/hosts, please run --pingsweep first!======')
         exit()
     else:
-        print(colored('\n======Performing initial nmap scans, this could take a bit...======', 'blue'))
+        print(Style.BRIGHT + Fore.BLUE + '\n======Performing initial nmap scans, this could take a bit...======')
         for filename in os.listdir(directory):
             hosts = "output/hosts/" + filename
             with open(hosts) as f:
@@ -152,9 +151,7 @@ def nmaprnd1(nmapArguments,portslist):
                     hostbyport(portslist)
                     n.close()
 
-    print(colored(
-        "\n======Nmap scans complete! Check nmaprnd1.txt for full scan results. Hosts by port can be found under output/ports======",
-        'blue'))
+    print(Style.BRIGHT + Fore.BLUE + "\n======Nmap scans complete! Check nmaprnd1.txt for full scan results. Hosts by port can be found under output/ports======")
 
 #-----SMB CHECK-----
 #Description:
@@ -164,12 +161,12 @@ def smbcheck():
     file = 'output/ports/445.txt'
     file_exists = exists(file)
     if file_exists == False:
-        print(colored('\n======445.txt does not exist! Please run --nmap first!======', "red"))
+        print(Style.BRIGHT + Fore.RED + '\n======445.txt does not exist! Please run --nmap first!======')
         exit()
 
     smbfile = open('output/ports/445.txt', 'r')
     Lines = smbfile.readlines()
-    print(colored('\n======Checking hosts for SMB signing======', 'blue'))
+    print(Style.BRIGHT + Fore.BLUE + '\n======Checking hosts for SMB signing======')
     for line in Lines:
         try:
             nm.scan(line, arguments='-p 445 --script smb2-security-mode')
@@ -185,11 +182,11 @@ def smbcheck():
                 e = open('output/smbenforced.txt', 'a+')
                 print(cleaned, file=e)
         except (KeyError):
-            print(colored("KeyError! You may need to check signing manually!", "red"))
+            print(Style.BRIGHT + Fore.RED + Back.YELLOW + "KeyError! You may need to check signing manually!")
             pass
 
 
-    print(colored('\n======SMB Signing checks complete! Check output/ for results!======', 'blue'))        
+    print(Style.BRIGHT + Fore.BLUE + '\n======SMB Signing checks complete! Check output/ for results!======')        
 
 # define nmap
 nm = nmap.PortScanner()
@@ -225,10 +222,12 @@ parser.add_argument("--single", help="Run RDNS Sweeps against targeted subnet, u
 args = parser.parse_args()		
 
 #Main script
+#start colorama
+init()
 
 # print banner
 b = open('banner.txt', 'r')
-print(colored(''.join([line for line in b]), 'blue'))
+print(Style.BRIGHT + Fore.BLUE + ''.join([line for line in b]))
 
 # chmod on subnet.sh dependent script
 os.chmod('scripts/subnet.sh', stat.S_IEXEC)
@@ -245,9 +244,7 @@ if not os.path.exists('output/ports'):
 file = args.exclusions
 file_exists = exists(file)
 if file_exists == False:
-    text = args.exclusions + " does not exist. Please create the file and try again."
-    print()
-    print(colored( text, "red"))
+    print(Style.BRIGHT + Fore.RED + args.exclusions + " does not exist. Please create the file and try again.")
     exit()
 
 if args.rdns == True:
